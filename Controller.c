@@ -2,10 +2,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
- 
 #include <netinet/in.h>
 #include <arpa/inet.h>
- 
 #include <ncurses.h>
 #include <string.h>
 #include <errno.h>
@@ -13,7 +11,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
- 
 #include <pthread.h>
 #include <semaphore.h>
  
