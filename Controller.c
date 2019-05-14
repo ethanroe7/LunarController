@@ -21,7 +21,7 @@ void getCondition(int fd, struct addrinfo *address);
 void getUserInput(int fd, struct addrinfo *address);
 void updateDashboard(int fd, struct addrinfo *address);
 void* userInputThreadController(void *arg);
-void* dashThreadController(void *arg);
+void* dashboardController(void *arg);
  
 int enginePower = 0;
 int engineInc = 10;
@@ -31,10 +31,11 @@ char *fuel;
 char *altitude;
  
 int main(int argc, const char **argv) {
-    pthread_t dashThread;
-    int dt = pthread_create(&dashThread, NULL, dashThreadController, NULL);
+
+    pthread_t dashboardThread;
+    int dt = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
  
-    pthread_t userInputThread;
+    pthread_t uiThread;
     int uit  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
  
     if(dt != 0) {
@@ -47,17 +48,14 @@ int main(int argc, const char **argv) {
         exit(-1);
     }
  
-    //we only wait for the user input thread, one this stops, stop entire program
-    pthread_join(dashThread, NULL);
+    pthread_join(dashboardThread, NULL);
 }
  
 void* userInputThreadController(void *arg) {
     char *port = "65200";
     char *host = "192.168.1.65";
     struct addrinfo *address;
- 
     int fd;
- 
     getaddr(host, port, &address);
     fd = makeSocket();
  
@@ -65,41 +63,37 @@ void* userInputThreadController(void *arg) {
     exit(0);
 }
  
-void* dashThreadController(void *arg) {
-    char *dashPort = "65250";
-    char *dashHost = "192.168.1.65";
-    char *landerPort = "65200";
-    char *landerHost = "192.168.1.65";
-    struct addrinfo *dashAddress, *landerAddress;
+void* dbThreadController(void *arg) {
+    char *dashboardPort = "65250";
+    char *dashboardHost = "192.168.1.65";
+    char *lunarLanderPort = "65200";
+    char *lunarLanderHost = "192.168.1.65";
+    struct addrinfo *dashboardAddress, *lunarLanderAddress;
+    int dashboardSocket, lunarLanderSocket;
  
-    int dashSocket, landerSocket;
- 
-    getaddr(dashHost, dashPort, &dashAddress);
-    getaddr(landerHost, landerPort, &landerAddress);
- 
-    dashSocket = makeSocket();
-    landerSocket = makeSocket();
+    getaddr(dashboardHost, dashboardPort, &dashboardAddress);
+    getaddr(lunarLanderHost, lunarLanderPort, &lunarLanderAddress);
+    dashboardSocket = makeSocket();
+    lunarLanderSocket = makeSocket();
  
     while (1) {
-        getCondition(landerSocket, landerAddress);
-        updateDashboard(dashSocket, dashAddress);
+        getCondition(lunarLanderSocket, lunarLanderAddress);
+        updateDashboard(dashboardSocket, dashboardAddress);
     }
 }
  
 void getUserInput(int fd, struct addrinfo *address) {
     initscr();
     noecho();
-    keypad(stdscr, TRUE); //allow for arrow keys
- 
+    keypad(stdscr, TRUE); 
     int key;
-    printw("Press the vetical arrow keys to control the thrust...\n");
-    printw("Press the horizontal arrow keys to control the rotational thrust...\n");
-    printw("Press the ESC key to quit.");
+    printw("To control the thrust, press the vetical arrow keys...\n");
+    printw("To control the rotational thrust, press the horizontal arrow keys ...\n");
+    printw("To quit, press ESC.");
  
     while((key=getch()) != 27) {
         move(10, 0);
         printw("\nFuel: %s \nAltitude: %s", fuel, altitude);
-        //we can only add more power if at most 90, since max is 100
         if(key == 259 && enginePower <= 90) {
             enginePower += engineInc;
             sendCommand(fd, address);
@@ -120,7 +114,6 @@ void getUserInput(int fd, struct addrinfo *address) {
         move(0, 0);
         refresh();
     }
- 
     endwin();
     exit(1);
 }
@@ -185,7 +178,6 @@ int getaddr(const char *node, const char *service, struct addrinfo **address) {
         exit(1);
         return false;
     }
- 
     return true;
 }
  
