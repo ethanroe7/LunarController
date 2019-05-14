@@ -21,7 +21,8 @@ void getCondition(int fd, struct addrinfo *address);
 void getUserInput(int fd, struct addrinfo *address);
 void updateDashboard(int fd, struct addrinfo *address);
 void* userInputThreadController(void *arg);
-void* dashboardController(void *arg);
+void* dashboardThreadController(void *arg);
+void* serverThreadController(void *arg);
  
 int enginePower = 0;
 int engineInc = 10;
@@ -35,8 +36,11 @@ int main(int argc, const char **argv) {
     pthread_t dashboardThread;
     int dt = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
  
-    pthread_t uiThread;
+    pthread_t userInputThread;
     int uit  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
+
+    pthread_t serverThread;
+    int st = p_thread_create(&serverThread, NULL, serverThreadController, NULL);
  
     if(dt != 0) {
         fprintf(stderr, "Could not create thread.\n");
@@ -47,8 +51,13 @@ int main(int argc, const char **argv) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
+
+     if (st != 0) {
+        fprintf(stderr, "Could not create thread.\n");
+        exit(-1);
+    }
  
-    pthread_join(dashboardThread, NULL);
+
 }
  
 void* userInputThreadController(void *arg) {
@@ -63,7 +72,7 @@ void* userInputThreadController(void *arg) {
     exit(0);
 }
  
-void* dbThreadController(void *arg) {
+void* dashboardThreadController(void *arg) {
     char *dashboardPort = "65250";
     char *dashboardHost = "192.168.1.65";
     char *lunarLanderPort = "65200";
@@ -93,7 +102,6 @@ void getUserInput(int fd, struct addrinfo *address) {
  
     while((key=getch()) != 27) {
         move(10, 0);
-        printw("\nFuel: %s \nAltitude: %s", fuel, altitude);
         if(key == 259 && enginePower <= 90) {
             enginePower += engineInc;
             sendCommand(fd, address);
@@ -135,7 +143,7 @@ void updateDashboard(int fd, struct addrinfo *address) {
 }
  
 void getCondition(int fd, struct addrinfo *address) {
-    const size_t buffsize = 4096;
+    const size_t buffsize = 4096; //4k
     char incoming[buffsize], outgoing[buffsize];
     size_t msgsize;
  
@@ -144,7 +152,6 @@ void getCondition(int fd, struct addrinfo *address) {
     msgsize = recvfrom(fd, incoming, buffsize, 0, NULL, 0);
     incoming[msgsize] = '\0';
  
-    //get each condition
     char *condition = strtok(incoming, ":");
     char *conditions[4]; //condition returns 4 values
     int i = 0;
