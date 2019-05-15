@@ -14,45 +14,47 @@
 #include <pthread.h>
 #include <semaphore.h>
  
-int getaddr(const char *node, const char *service, struct addrinfo **address);
-int makeSocket(void);
-void sendCommand(int fd, struct addrinfo *address);
-void getCondition(int fd, struct addrinfo *address);
-void getUserInput(int fd, struct addrinfo *address);
-void updateDashboard(int fd, struct addrinfo *address);
 void* userInputThreadController(void *arg);
 void* dashboardThreadController(void *arg);
 void* serverThreadController(void *arg);
+void sendCommand(int fd, struct addrinfo *address);
+void getCondition(int fd, struct addrinfo *address);
+void getUserInput(int fd, struct addrinfo *address);
+void dashUpdate(int fd, struct addrinfo *address);
+void serverUpdate(int fd, struct addrinfo *address);
+int getaddr(const char *node, const char *service, struct addrinfo **address);
+int makeSocket(void);
  
-int enginePower = 0;
-int engineInc = 10;
 float rcsInc = 0.1;
 float rcsRoll = 0;
-char *fuel;
-char *altitude;
+int landerEnginePower = 0;
+int landerEngineInc = 10;
+char *landerFuel;
+char *landerAltitude;
+int noOfCommands = 0;
  
 int main(int argc, const char **argv) {
 
     pthread_t dashboardThread;
-    int dt = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
+    int dthread = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
  
     pthread_t userInputThread;
-    int uit  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
+    int uithread  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
 
     pthread_t serverThread;
-    int st = p_thread_create(&serverThread, NULL, serverThreadController, NULL);
+    int sthread = p_thread_create(&serverThread, NULL, serverThreadController, NULL);
  
-    if(dt != 0) {
+    if(dthread != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
  
-    if (uit != 0) {
+    if (uithread != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
 
-     if (st != 0) {
+     if (sthread != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
@@ -62,21 +64,20 @@ int main(int argc, const char **argv) {
  
 void* userInputThreadController(void *arg) {
     char *port = "65200";
-    char *host = "192.168.1.65";
+    char *host = "192.168.56.1";
     struct addrinfo *address;
     int fd;
     getaddr(host, port, &address);
     fd = makeSocket();
- 
     getUserInput(fd, address);
     exit(0);
 }
  
 void* dashboardThreadController(void *arg) {
     char *dashboardPort = "65250";
-    char *dashboardHost = "192.168.1.65";
+    char *dashboardHost = "192.168.56.1";
     char *lunarLanderPort = "65200";
-    char *lunarLanderHost = "192.168.1.65";
+    char *lunarLanderHost = "192.168.56.1";
     struct addrinfo *dashboardAddress, *lunarLanderAddress;
     int dashboardSocket, lunarLanderSocket;
  
@@ -88,6 +89,19 @@ void* dashboardThreadController(void *arg) {
     while (1) {
         getCondition(lunarLanderSocket, lunarLanderAddress);
         updateDashboard(dashboardSocket, dashboardAddress);
+    }
+}
+
+void* serverThreadController(void *arg) {
+    char *port = "65200";
+    char *host = "192.168.56.1";
+    struct addrinfo *address;
+    int fd;
+    getaddr(host, port &address);
+    fd makeSocket();
+
+    while(1) {
+        serverUpdate(fd, address);
     }
 }
  
@@ -104,19 +118,19 @@ void getUserInput(int fd, struct addrinfo *address) {
         move(10, 0);
         if(key == 259 && enginePower <= 90) {
             enginePower += engineInc;
-            sendCommand(fd, address);
+            noOfCommands++;
         }
         else if(key == 258 && enginePower >= 10) {
             enginePower -= engineInc;
-            sendCommand(fd, address);
+            noOfCommands++;
         }
         else if(key == 260 && rcsRoll > -0.5) {
-            rcsRoll -= rcsInc;
-            sendCommand(fd, address);
+            rcsRoll -= rcsInc;	
+            noOfCommands++;
         }
         else if(key == 261 && rcsRoll <= 0.4) {
             rcsRoll += rcsInc;
-            sendCommand(fd, address);
+            noOfCommands++;
         }
  
         move(0, 0);
@@ -134,12 +148,23 @@ void sendCommand(int fd, struct addrinfo *address) {
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 }
  
-void updateDashboard(int fd, struct addrinfo *address) {
+void dashUpdate(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
     char outgoing[buffsize];
     snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", fuel, altitude);
- 
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
+
+    fuelBefore = fuel;
+    altitudeBefore = altitude; 
+}
+
+void serverUpdate(int fd, struct addrinfo *address) {
+    if(noOfCommands > 0) {
+        char outgoing[4096];
+        snprintf(outgoing, sizeof(outgoing), "command:!\nengine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
+        sendto(fd, outgoing, strlen(outgoing), 0, address-> ai_addr, address->ai_addrlen);
+        noOfCommands--;
+    }
 }
  
 void getCondition(int fd, struct addrinfo *address) {
@@ -164,6 +189,14 @@ void getCondition(int fd, struct addrinfo *address) {
     char *fuel_ = strtok(conditions[2], "%");
     fuel = fuel_;
     altitude = strtok(conditions[3], "contact");
+
+    if(fuelBefore ==-1) {
+	fuelBefore = fuel +1;
+    }
+
+    if(altitudeBefore == -1) {
+	altitudeBefore = altitude +1;
+    }
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
@@ -181,7 +214,7 @@ int getaddr(const char *node, const char *service, struct addrinfo **address) {
     int err = getaddrinfo(node, service, &hints, address);
  
     if(err) {
-        fprintf(stderr, "ERROR Getting Address: %s\n", gai_strerror(err));
+        fprintf(stderr, "Error: couldn't get address: %s\n", gai_strerror(err));
         exit(1);
         return false;
     }
@@ -189,24 +222,20 @@ int getaddr(const char *node, const char *service, struct addrinfo **address) {
 }
  
 int makeSocket(void) {
-    int sfd = socket(AF_INET, SOCK_DGRAM, 0);
- 
+    int sfd = socket(AF_INET, SOCK_DGRAM, 0); 
     if(sfd == -1) {
-        fprintf(stderr, "Error making socket: %s\n", strerror(errno));
+        fprintf(stderr, "Error: couldn't make socket: %s\n", strerror(errno));
         exit(1);
         return 0;
     }
- 
     return sfd;
 }
  
 int bindSocket(int sfd, const struct sockaddr *addr, socklen_t addrlen) {
     int err = bind(sfd, addr, addrlen);
- 
     if(err == -1) {
-        fprintf(stderr, "Error Binding socket: %s\n", strerror(errno));
+        fprintf(stderr, "Error: couldn't bind socket: %s\n", strerror(errno));
         return false;
     }
- 
     return true;
 }
