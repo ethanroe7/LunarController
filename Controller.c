@@ -190,14 +190,14 @@ void getCondition(int fd, struct addrinfo *address) {
     char *landerFuel_ = strtok(conditions[2], "%");
     landerFuel = landerFuel_;
     landerAltitude = strtok(conditions[3], "contact");
-
+    /*
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
     }
 
     if(altitudeBefore == -1) {
 	altitudeBefore = landerAltitude +1;
-    }
+    }*/
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
