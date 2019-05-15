@@ -44,7 +44,7 @@ int main(int argc, const char **argv) {
     int uithread  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
 
     pthread_t serverThread;
-    int sthread = p_thread_create(&serverThread, NULL, serverThreadController, NULL);
+    int sthread = pthread_create(&serverThread, NULL, serverThreadController, NULL);
  
     if(dthread != 0) {
         fprintf(stderr, "Could not create thread.\n");
@@ -90,7 +90,7 @@ void* dashboardThreadController(void *arg) {
  
     while (1) {
         getCondition(lunarLanderSocket, lunarLanderAddress);
-        updateDashboard(dashboardSocket, dashboardAddress);
+        dashUpdate(dashboardSocket, dashboardAddress);
     }
 }
 
@@ -99,7 +99,7 @@ void* serverThreadController(void *arg) {
     char *host = "192.168.56.1";
     struct addrinfo *address;
     int fd;
-    getaddr(host, port &address);
+    getaddr(host, port, &address);
     fd = makeSocket();
     while(1) {
         serverUpdate(fd, address);
@@ -189,7 +189,7 @@ void getCondition(int fd, struct addrinfo *address) {
  
     char *landerFuel_ = strtok(conditions[2], "%");
     landerFuel = landerFuel_;
-    altitude = strtok(conditions[3], "contact");
+    landerAltitude = strtok(conditions[3], "contact");
 
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
