@@ -31,6 +31,8 @@ int landerEnginePower = 0;
 int landerEngineInc = 10;
 char *landerFuel;
 char *landerAltitude;
+char *fuelBefore;
+char *altitudeBefore;
 int noOfCommands = 0;
  
 int main(int argc, const char **argv) {
@@ -99,7 +101,6 @@ void* serverThreadController(void *arg) {
     int fd;
     getaddr(host, port &address);
     fd makeSocket();
-
     while(1) {
         serverUpdate(fd, address);
     }
@@ -117,11 +118,11 @@ void getUserInput(int fd, struct addrinfo *address) {
     while((key=getch()) != 27) {
         move(10, 0);
         if(key == 259 && enginePower <= 90) {
-            enginePower += engineInc;
+            landerEnginePower += landerEngineInc;
             noOfCommands++;
         }
         else if(key == 258 && enginePower >= 10) {
-            enginePower -= engineInc;
+            landerEnginePower -= landerEngineInc;
             noOfCommands++;
         }
         else if(key == 260 && rcsRoll > -0.5) {
@@ -144,7 +145,7 @@ void sendCommand(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
     char outgoing[buffsize];
  
-    snprintf(outgoing, sizeof(outgoing), "command:!\nmain-engine: %i\nrcs-roll: %f", enginePower, rcsRoll);
+    snprintf(outgoing, sizeof(outgoing), "command:!\nmain-engine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 }
  
@@ -154,8 +155,8 @@ void dashUpdate(int fd, struct addrinfo *address) {
     snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", fuel, altitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 
-    fuelBefore = fuel;
-    altitudeBefore = altitude; 
+    fuelBefore = landerFuel;
+    altitudeBefore = landerAltitude; 
 }
 
 void serverUpdate(int fd, struct addrinfo *address) {
@@ -191,11 +192,11 @@ void getCondition(int fd, struct addrinfo *address) {
     altitude = strtok(conditions[3], "contact");
 
     if(fuelBefore ==-1) {
-	fuelBefore = fuel +1;
+	fuelBefore = landerFuel +1;
     }
 
     if(altitudeBefore == -1) {
-	altitudeBefore = altitude +1;
+	altitudeBefore = landerAltitude +1;
     }
 }
  
