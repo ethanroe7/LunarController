@@ -100,7 +100,7 @@ void* serverThreadController(void *arg) {
     struct addrinfo *address;
     int fd;
     getaddr(host, port &address);
-    fd makeSocket();
+    fd = makeSocket();
     while(1) {
         serverUpdate(fd, address);
     }
@@ -117,11 +117,11 @@ void getUserInput(int fd, struct addrinfo *address) {
  
     while((key=getch()) != 27) {
         move(10, 0);
-        if(key == 259 && enginePower <= 90) {
+        if(key == 259 && landerEnginePower <= 90) {
             landerEnginePower += landerEngineInc;
             noOfCommands++;
         }
-        else if(key == 258 && enginePower >= 10) {
+        else if(key == 258 && landerEnginePower >= 10) {
             landerEnginePower -= landerEngineInc;
             noOfCommands++;
         }
@@ -152,7 +152,7 @@ void sendCommand(int fd, struct addrinfo *address) {
 void dashUpdate(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
     char outgoing[buffsize];
-    snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", fuel, altitude);
+    snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 
     fuelBefore = landerFuel;
@@ -187,11 +187,11 @@ void getCondition(int fd, struct addrinfo *address) {
         condition = strtok(NULL, ":");
     }
  
-    char *fuel_ = strtok(conditions[2], "%");
-    fuel = fuel_;
+    char *landerFuel_ = strtok(conditions[2], "%");
+    landerFuel = landerFuel_;
     altitude = strtok(conditions[3], "contact");
 
-    if(fuelBefore ==-1) {
+    if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
     }
 
