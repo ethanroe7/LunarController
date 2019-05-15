@@ -6,13 +6,13 @@
 #include <arpa/inet.h>
 #include <ncurses.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <semaphore.h>
  
 void* userInputThreadController(void *arg);
 void* dashboardThreadController(void *arg);
@@ -237,4 +237,11 @@ int bindSocket(int sfd, const struct sockaddr *addr, socklen_t addrlen) {
         return false;
     }
     return true;
+}
+
+size_t protocol(char *incoming, char *outgoing, size_t size)
+{
+    long t = time(NULL);
+    strcpy(outgoing, ctime(&t));
+    return strlen(outgoing);
 }
