@@ -33,7 +33,7 @@ char *landerFuel;
 char *landerAltitude;
 char fuelBefore;
 char altitudeBefore;
-int noOfCommands = 0;
+int commands = 0;
  
 int main(int argc, const char **argv) {
 
@@ -60,9 +60,7 @@ int main(int argc, const char **argv) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
- 
-
-}
+ }
  
 void* userInputThreadController(void *arg) {
     char *port = "65200";
@@ -119,19 +117,19 @@ void getUserInput(int fd, struct addrinfo *address) {
         move(10, 0);
         if(key == 259 && landerEnginePower <= 90) {
             landerEnginePower += landerEngineInc;
-            noOfCommands++;
+            commands++;
         }
         else if(key == 258 && landerEnginePower >= 10) {
             landerEnginePower -= landerEngineInc;
-            noOfCommands++;
+            commands++;
         }
         else if(key == 260 && rcsRoll > -0.5) {
             rcsRoll -= rcsInc;	
-            noOfCommands++;
+            commands++;
         }
         else if(key == 261 && rcsRoll <= 0.4) {
             rcsRoll += rcsInc;
-            noOfCommands++;
+            commands++;
         }
  
         move(0, 0);
@@ -160,11 +158,11 @@ void dashUpdate(int fd, struct addrinfo *address) {
 }
 
 void serverUpdate(int fd, struct addrinfo *address) {
-    if(noOfCommands > 0) {
+    if(commands > 0) {
         char outgoing[4096];
         snprintf(outgoing, sizeof(outgoing), "command:!\nengine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
         sendto(fd, outgoing, strlen(outgoing), 0, address-> ai_addr, address->ai_addrlen);
-        noOfCommands--;
+        commands--;
     }
 }
  
@@ -190,14 +188,14 @@ void getCondition(int fd, struct addrinfo *address) {
     char *landerFuel_ = strtok(conditions[2], "%");
     landerFuel = landerFuel_;
     landerAltitude = strtok(conditions[3], "contact");
-    /*
+    
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
     }
 
     if(altitudeBefore == -1) {
 	altitudeBefore = landerAltitude +1;
-    }*/
+    }
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
