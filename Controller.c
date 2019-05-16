@@ -81,9 +81,11 @@ void* dashboardThreadController(void *arg) {
     char *lunarLanderHost = "192.168.56.1";
     struct addrinfo *dashboardAddress, *lunarLanderAddress;
     int dashboardSocket, lunarLanderSocket;
- 
+    
     getaddr(dashboardHost, dashboardPort, &dashboardAddress);
     getaddr(lunarLanderHost, lunarLanderPort, &lunarLanderAddress);
+    dashboardSocket = makeSocket();
+    lunarLanderSocket = makeSocket();
  
     while (1) {
         getCondition(lunarLanderSocket, lunarLanderAddress);
