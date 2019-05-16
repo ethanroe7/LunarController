@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <time.h>
 #include <pthread.h>
-#include <semaphore.h>
 
 int makeSocket(void);
 void* userInputThreadController(void *arg);
@@ -35,17 +34,8 @@ float landerFuel;
 float landerAltitude;
 float landerFuelBefore = -1;
 float landerAltitudeBefore = -1;
-
-sem_t sem;
  
 int main(int argc, const char *argv[]) {
-
-    int rc = sem_init(&sem, 0, 1);
-    //if semaphore is not created, exit program
-    if(rc != 0) {
-        fprintf(stderr, "Could not create semaphore.\n");
-        exit(-1);
-    }
     
     //Create Threads
     pthread_t dashboardThread;
@@ -148,16 +138,10 @@ void dashUpdate(int fd, struct addrinfo *address) {
     char outgoing[buffsize];
     snprintf(outgoing, sizeof(outgoing), "fuel: %.2f \naltitude: %.2f", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
-    //semamphore 
-    int rc = sem_wait(&sem);
-    assert(rc == 0);
-
     landerFuelBefore = landerFuel;
     landerAltitudeBefore = landerAltitude;
-    
-    rc = sem_post(&sem);
-    assert(rc == 0); 
 }
+
 //updates server
 void serverUpdate(int fd, struct addrinfo *address) {
     if(commands > 0) {
@@ -189,9 +173,6 @@ void getCondition(int fd, struct addrinfo *address) {
 
     char *landerFuel_ = strtok(conditions[2], "%");
     char *landerAltitude_ = strtok(conditions[3], "contact");
-    int rc = sem_wait(&sem);
-    assert(rc == 0);
-
     landerFuel = strtof(landerFuel_, NULL);
     landerAltitude = strtof(landerAltitude_, NULL);
 
@@ -202,8 +183,6 @@ void getCondition(int fd, struct addrinfo *address) {
     if(landerAltitudeBefore == -1) {
 	landerAltitudeBefore = landerAltitude +1;
     }
-    rc = sem_post(&sem);
-    assert(rc == 0);
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
