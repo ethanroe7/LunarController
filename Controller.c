@@ -112,7 +112,7 @@ void* dashboardThreadController(void *arg) {
  
     while (1) {
         getCondition(lunarLanderSocket, lunarLanderAddress);
-        if(landerFuelBefore - landerFuel >= 1 || landerAltitudeBefore - landerAltitude >= 1 || landerFuel - landerFuelBefre >= 1 || landerAltitude - landerAltitudeBefore >= 1){
+        if(landerFuelBefore - landerFuel >= 1 || landerAltitudeBefore - landerAltitude >= 1 || landerFuel - landerFuelBefore >= 1 || landerAltitude - landerAltitudeBefore >= 1){
             dashUpdate(dashboardSocket, dashboardAddress);
         }
     }
