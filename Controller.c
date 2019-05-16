@@ -18,7 +18,6 @@ int makeSocket(void);
 void* userInputThreadController(void *arg);
 void* dashboardThreadController(void *arg);
 void* serverThreadController(void *arg);
-void sendCommand(int fd, struct addrinfo *address);
 void getCondition(int fd, struct addrinfo *address);
 void dashUpdate(int fd, struct addrinfo *address);
 void serverUpdate(int fd, struct addrinfo *address);
@@ -67,7 +66,7 @@ int main(int argc, const char *argv[]) {
 void* userInputThreadController(void *arg) {
     initscr();
     noecho();
-    keypad(stdscr, TRUE); 
+    keypad(stdscr, TRUE); //can use arrow keys for controls
     int key;
     printw("To control the thrust, press the vetical arrow keys...\n");
     printw("To control the rotational thrust, press the horizontal arrow keys ...\n");
@@ -96,7 +95,19 @@ void* userInputThreadController(void *arg) {
     endwin();
     exit(1);
 }
- 
+//Thread to connect to server
+void* serverThreadController(void *arg) {
+    char *port = "65200";
+    char *host = "192.168.56.1";
+    struct addrinfo *address;
+    int fd;
+    getaddr(host, port, &address);
+    fd = makeSocket();
+    while(1) {
+        serverUpdate(fd, address);
+    }
+}
+//Thread to connect to dashboard
 void* dashboardThreadController(void *arg) {
     char *dashboardPort = "65250";
     char *dashboardHost = "192.168.56.1";
@@ -116,28 +127,9 @@ void* dashboardThreadController(void *arg) {
             dashUpdate(dashboardSocket, dashboardAddress);
         }
     }
-}
-
-void* serverThreadController(void *arg) {
-    char *port = "65200";
-    char *host = "192.168.56.1";
-    struct addrinfo *address;
-    int fd;
-    getaddr(host, port, &address);
-    fd = makeSocket();
-    while(1) {
-        serverUpdate(fd, address);
-    }
-}
+} 
  
- 
-void sendCommand(int fd, struct addrinfo *address) {
-    const size_t buffsize = 4096;
-    char outgoing[buffsize];
-    snprintf(outgoing, sizeof(outgoing), "command:!\nmain-engine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
-    sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
-}
- 
+//Updates dashboard
 void dashUpdate(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
     char outgoing[buffsize];
@@ -147,7 +139,7 @@ void dashUpdate(int fd, struct addrinfo *address) {
     landerFuelBefore = landerFuel;
     landerAltitudeBefore = landerAltitude; 
 }
-
+//updates server
 void serverUpdate(int fd, struct addrinfo *address) {
     if(commands > 0) {
         char outgoing[4096];
@@ -175,7 +167,7 @@ void getCondition(int fd, struct addrinfo *address) {
         conditions[i++] = condition;
         condition = strtok(NULL, ":");
     }
-    
+
     char *landerFuelStr = strtok(conditions[2], "%");
     char *landerAltitudeStr = strtok(conditions[3], "contact");
     landerFuel = strtof(landerFuelStr, NULL);
