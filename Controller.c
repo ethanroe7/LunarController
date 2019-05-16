@@ -32,8 +32,8 @@ int landerEnginePower = 0;
 int landerEngineInc = 10;
 float landerFuel;
 float landerAltitude;
-float fuelBefore = 1
-float altitudeBefore = -1;
+float landerFuelBefore = 1
+float landerAltitudeBefore = -1;
  
 int main(int argc, const char **argv) {
     pthread_t dashboardThread;
@@ -148,11 +148,11 @@ void sendCommand(int fd, struct addrinfo *address) {
 void dashUpdate(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
     char outgoing[buffsize];
-    snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", landerFuel, landerAltitude);
+    snprintf(outgoing, sizeof(outgoing), "fuel: %.2f \naltitude: %.2f", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 
-    fuelBefore = landerFuel;
-    altitudeBefore = landerAltitude; 
+    landerFuelBefore = landerFuel;
+    landerAltitudeBefore = landerAltitude; 
 }
 
 void serverUpdate(int fd, struct addrinfo *address) {
@@ -185,15 +185,16 @@ void getCondition(int fd, struct addrinfo *address) {
    
     char *landerFuel_ = strtok(conditions[2], "%");
     landerFuel = landerFuel_;
-    landerAltitude = strtok(conditions[3], "contact");
+    char *landerAltitude_ = strtok(conditions[3], "contact");
+    landerAltitude = landerAltitude_
     
 
     if(fuelBefore == -1) {
-	fuelBefore = landerFuel +1;
+	landerFuelBefore = landerFuel +1;
     }
 
     if(altitudeBefore == -1) {
-	altitudeBefore = landerAltitude +1;
+	landerAltitudeBefore = landerAltitude +1;
     }
 }
  
