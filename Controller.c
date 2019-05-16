@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <semaphore.h>
  
 void* userInputThreadController(void *arg);
 void* dashboardThreadController(void *arg);
@@ -34,18 +35,21 @@ char *landerAltitude;
 //char fuelBefore;
 //char altitudeBefore;
 int commands = 0;
+sem_t mutex;
  
 int main(int argc, const char **argv) {
-
+    sem_init(&mutex, 0, 1);
     pthread_t dashboardThread;
     int dthread = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
- 
+    
     pthread_t userInputThread;
     int uithread  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
-
+    sleep(2);
     pthread_t serverThread;
     int sthread = pthread_create(&serverThread, NULL, serverThreadController, NULL);
- 
+    sem_destroy(&mutex);
+    return 0;
+    
     if(dthread != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
