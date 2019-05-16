@@ -89,8 +89,6 @@ void* userInputThreadController(void *arg) {
             rcsRoll += rcsInc;
             commands++;
         }
- 
-        move(0, 0);
         refresh();
     }
     endwin();
