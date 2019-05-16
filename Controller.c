@@ -36,26 +36,26 @@ float landerAltitudeBefore = -1;
 int main(int argc, const char *argv[]) {
     //Create Threads
     pthread_t dashboardThread;
-    int dthread = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
+    int dashboard = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
     
     pthread_t userInputThread;
-    int uithread  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
+    int userInput  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
     
     pthread_t serverThread;
-    int sthread = pthread_create(&serverThread, NULL, serverThreadController, NULL);
+    int server = pthread_create(&serverThread, NULL, serverThreadController, NULL);
     
     //If threads are not created, exit program
-    if(dthread != 0) {
+    if(dashboard != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
  
-    if (uithread != 0) {
+    if (userInput != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
 
-     if (sthread != 0) {
+     if (server != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
