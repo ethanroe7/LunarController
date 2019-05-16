@@ -44,12 +44,12 @@ int main(int argc, const char **argv) {
     
     pthread_t userInputThread;
     int uithread  = pthread_create(&userInputThread, NULL, userInputThreadController, NULL);
-    sleep(2);
+    
     pthread_t serverThread;
     int sthread = pthread_create(&serverThread, NULL, serverThreadController, NULL);
     sem_destroy(&mutex);
     return 0;
-    
+
     if(dthread != 0) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
@@ -67,6 +67,7 @@ int main(int argc, const char **argv) {
  }
  
 void* userInputThreadController(void *arg) {
+    sem_wait(&mutex)
     char *port = "65200";
     char *host = "192.168.56.1";
     struct addrinfo *address;
@@ -75,6 +76,7 @@ void* userInputThreadController(void *arg) {
     fd = makeSocket();
     getUserInput(fd, address);
     exit(0);
+    sem_post(&mutex);
 }
  
 void* dashboardThreadController(void *arg) {
