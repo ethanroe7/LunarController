@@ -184,8 +184,8 @@ void getCondition(int fd, struct addrinfo *address) {
         condition = strtok(NULL, ":");
     }
    
-    char landerFuelStr = strtok(conditions[2], "%");
-    char landerAltitudeStr = strtok(conditions[3], "contact");
+    char *landerFuelStr = strtok(conditions[2], "%");
+    char *landerAltitudeStr = strtok(conditions[3], "contact");
 
     landerFuel = strtof(landerFuelStr, NULL);
     landerAltitude = strtof(landerAltitudeStr, NULL);
