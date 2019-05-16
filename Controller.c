@@ -29,10 +29,10 @@ float rcsInc = 0.1;
 float rcsRoll = 0;
 int landerEnginePower = 0;
 int landerEngineInc = 10;
-char *landerFuel;
-char *landerAltitude;
-char *fuelBefore;
-char *altitudeBefore;
+char landerFuel;
+char landerAltitude;
+char fuelBefore;
+char altitudeBefore;
 int commands = 0;
  
 int main(int argc, const char **argv) {
