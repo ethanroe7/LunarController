@@ -98,7 +98,7 @@ void* userInputThreadController(void *arg) {
 //Thread to connect to server
 void* serverThreadController(void *arg) {
     char *port = "65200";
-    char *host = "127.0.1.1";
+    char *host = "192.168.56.1";
     struct addrinfo *address;
     int fd;
     getaddr(host, port, &address);
@@ -110,9 +110,9 @@ void* serverThreadController(void *arg) {
 //Thread to connect to dashboard
 void* dashboardThreadController(void *arg) {
     char *dashboardPort = "65250";
-    char *dashboardHost = "127.0.1.1";
+    char *dashboardHost = "192.168.56.1";
     char *lunarLanderPort = "65200";
-    char *lunarLanderHost = "127.0.1.1";
+    char *lunarLanderHost = "192.168.56.1";
     struct addrinfo *dashboardAddress, *lunarLanderAddress;
     int dashboardSocket, lunarLanderSocket;
 
