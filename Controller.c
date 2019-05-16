@@ -102,6 +102,7 @@ void* serverThreadController(void *arg) {
     while(1) {
         serverUpdate(fd, address);
     }
+    sendCommand(fd, address);
 }
  
 void getUserInput(int fd, struct addrinfo *address) {
@@ -186,8 +187,8 @@ void getCondition(int fd, struct addrinfo *address) {
    
     char *landerFuel_ = strtok(conditions[2], "%");
     landerFuel = landerFuel_;
-    char *landerAltitude_ = strtok(conditions[3], "contact");
-    landerAltitude = landerAltitude_;
+    landerAltitude = strtok(conditions[3], "contact");
+    
 /*
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
