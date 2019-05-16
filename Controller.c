@@ -31,8 +31,8 @@ int landerEnginePower = 0;
 int landerEngineInc = 10;
 char *landerFuel;
 char *landerAltitude;
-char fuelBefore;
-char altitudeBefore;
+//char fuelBefore;
+//char altitudeBefore;
 int commands = 0;
  
 int main(int argc, const char **argv) {
@@ -152,8 +152,8 @@ void dashUpdate(int fd, struct addrinfo *address) {
     snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 
-    fuelBefore = landerFuel;
-    altitudeBefore = landerAltitude; 
+    //fuelBefore = landerFuel;
+    //altitudeBefore = landerAltitude; 
 }
 
 void serverUpdate(int fd, struct addrinfo *address) {
@@ -188,14 +188,14 @@ void getCondition(int fd, struct addrinfo *address) {
     landerFuel = landerFuel_;
     char *landerAltitude_ = strtok(conditions[3], "contact");
     landerAltitude = landerAltitude_;
-
+/*
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
     }
 
     if(altitudeBefore == -1) {
 	altitudeBefore = landerAltitude +1;
-    }
+    }*/
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
