@@ -84,10 +84,10 @@ void getInput(int fd, struct addrinfo *address) {
     initscr();
     keypad(stdscr, TRUE); //allow for arrow keys
  
-    int keyPressed;
-    printw("Use WASD Button pressed to controller the lander\n");
-    printw("W and S to contoler vertical Thrust, A and D to control horizontal angle\n");
-    printw("ESC to quit");
+    int key;
+    printw("To control the thrust, press the vetical arrow keys...\n");
+    printw("To control the rotational thrust, press the horizontal arrow keys ...\n");
+    printw("To quit, press ESC.");
  
     while ((key = getch()) != 27) {
         move(10, 0);
