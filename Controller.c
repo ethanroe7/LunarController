@@ -27,13 +27,13 @@ int makeSocket(void);
  
 float rcsInc = 0.1;
 float rcsRoll = 0;
+int commands = 0;
 int landerEnginePower = 0;
 int landerEngineInc = 10;
-char *landerFuel;
-char *landerAltitude;
-char fuelBefore;
-char altitudeBefore;
-int commands = 0;
+float landerFuel;
+float landerAltitude;
+float fuelBefore = 1
+float altitudeBefore = -1;
  
 int main(int argc, const char **argv) {
     pthread_t dashboardThread;
@@ -44,7 +44,6 @@ int main(int argc, const char **argv) {
     
     pthread_t serverThread;
     int sthread = pthread_create(&serverThread, NULL, serverThreadController, NULL);
-    return 0;
 
     if(dthread != 0) {
         fprintf(stderr, "Could not create thread.\n");
@@ -60,6 +59,8 @@ int main(int argc, const char **argv) {
         fprintf(stderr, "Could not create thread.\n");
         exit(-1);
     }
+
+    pthread_join(userInputThread, NULL);
  }
  
 void* userInputThreadController(void *arg) {
@@ -83,8 +84,6 @@ void* dashboardThreadController(void *arg) {
  
     getaddr(dashboardHost, dashboardPort, &dashboardAddress);
     getaddr(lunarLanderHost, lunarLanderPort, &lunarLanderAddress);
-    dashboardSocket = makeSocket();
-    lunarLanderSocket = makeSocket();
  
     while (1) {
         getCondition(lunarLanderSocket, lunarLanderAddress);
@@ -102,7 +101,6 @@ void* serverThreadController(void *arg) {
     while(1) {
         serverUpdate(fd, address);
     }
-    sendCommand(fd, address);
 }
  
 void getUserInput(int fd, struct addrinfo *address) {
