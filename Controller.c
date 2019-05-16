@@ -13,8 +13,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <semaphore.h>
- 
+
 void* userInputThreadController(void *arg);
 void* dashboardThreadController(void *arg);
 void* serverThreadController(void *arg);
@@ -32,13 +31,11 @@ int landerEnginePower = 0;
 int landerEngineInc = 10;
 char *landerFuel;
 char *landerAltitude;
-//char fuelBefore;
-//char altitudeBefore;
+char fuelBefore;
+char altitudeBefore;
 int commands = 0;
-sem_t mutex;
  
 int main(int argc, const char **argv) {
-    sem_init(&mutex, 0, 1);
     pthread_t dashboardThread;
     int dthread = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
     
@@ -47,7 +44,6 @@ int main(int argc, const char **argv) {
     
     pthread_t serverThread;
     int sthread = pthread_create(&serverThread, NULL, serverThreadController, NULL);
-    sem_destroy(&mutex);
     return 0;
 
     if(dthread != 0) {
@@ -67,7 +63,6 @@ int main(int argc, const char **argv) {
  }
  
 void* userInputThreadController(void *arg) {
-    sem_wait(&mutex);
     char *port = "65200";
     char *host = "192.168.56.1";
     struct addrinfo *address;
@@ -76,7 +71,6 @@ void* userInputThreadController(void *arg) {
     fd = makeSocket();
     getUserInput(fd, address);
     exit(0);
-    sem_post(&mutex);
 }
  
 void* dashboardThreadController(void *arg) {
@@ -159,8 +153,8 @@ void dashUpdate(int fd, struct addrinfo *address) {
     snprintf(outgoing, sizeof(outgoing), "fuel: %s \naltitude: %s", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 
-    //fuelBefore = landerFuel;
-    //altitudeBefore = landerAltitude; 
+    fuelBefore = landerFuel;
+    altitudeBefore = landerAltitude; 
 }
 
 void serverUpdate(int fd, struct addrinfo *address) {
@@ -195,14 +189,14 @@ void getCondition(int fd, struct addrinfo *address) {
     landerFuel = landerFuel_;
     landerAltitude = strtok(conditions[3], "contact");
     
-/*
+
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
     }
 
     if(altitudeBefore == -1) {
 	altitudeBefore = landerAltitude +1;
-    }*/
+    }
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
