@@ -36,7 +36,7 @@ float landerAltitude;
 float landerFuelBefore = -1;
 float landerAltitudeBefore = -1;
 
-sem_t sem
+sem_t sem;
  
 int main(int argc, const char *argv[]) {
 
