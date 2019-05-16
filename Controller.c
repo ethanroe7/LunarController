@@ -31,8 +31,8 @@ int landerEnginePower = 0;
 int landerEngineInc = 10;
 char *landerFuel;
 char *landerAltitude;
-char fuelBefore;
-char altitudeBefore;
+char *fuelBefore;
+char *altitudeBefore;
 int commands = 0;
  
 int main(int argc, const char **argv) {
