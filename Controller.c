@@ -42,7 +42,7 @@ int main(int argc, const char *argv[]) {
 
     int rc = sem_init(&sem, 0, 1);
     //if semaphore is not created, exit program
-    if(rc !0 = 0) {
+    if(rc != 0) {
         fprintg(strerr, "Could not create semaphore.\n");
         exit(-1);
     }
