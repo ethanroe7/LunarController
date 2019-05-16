@@ -67,7 +67,7 @@ int main(int argc, const char **argv) {
  }
  
 void* userInputThreadController(void *arg) {
-    sem_wait(&mutex)
+    sem_wait(&mutex);
     char *port = "65200";
     char *host = "192.168.56.1";
     struct addrinfo *address;
