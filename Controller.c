@@ -5,21 +5,20 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ncurses.h>
-#include <string.h>
-#include <time.h>
-#include <errno.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <string.h>
+#include <time.h>
+#include <errno.h>
+#include <stdlib.h>
 
 void* userInputThreadController(void *arg);
 void* dashboardThreadController(void *arg);
 void* serverThreadController(void *arg);
 void sendCommand(int fd, struct addrinfo *address);
 void getCondition(int fd, struct addrinfo *address);
-void getUserInput(int fd, struct addrinfo *address);
 void dashUpdate(int fd, struct addrinfo *address);
 void serverUpdate(int fd, struct addrinfo *address);
 int getaddr(const char *node, const char *service, struct addrinfo **address);
@@ -35,7 +34,7 @@ float landerAltitude;
 float landerFuelBefore = -1;
 float landerAltitudeBefore = -1;
  
-int main(int argc, const char **argv) {
+int main(int argc, const char *argv[]) {
     pthread_t dashboardThread;
     int dthread = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
     
@@ -64,51 +63,6 @@ int main(int argc, const char **argv) {
  }
  
 void* userInputThreadController(void *arg) {
-    char *port = "65200";
-    char *host = "192.168.56.1";
-    struct addrinfo *address;
-    int fd;
-    getaddr(host, port, &address);
-    fd = makeSocket();
-    getUserInput(fd, address);
-    exit(0);
-}
- 
-void* dashboardThreadController(void *arg) {
-    char *dashboardPort = "65250";
-    char *dashboardHost = "192.168.56.1";
-    char *lunarLanderPort = "65200";
-    char *lunarLanderHost = "192.168.56.1";
-    struct addrinfo *dashboardAddress, *lunarLanderAddress;
-    int dashboardSocket, lunarLanderSocket;
-    
-    getaddr(dashboardHost, dashboardPort, &dashboardAddress);
-    getaddr(lunarLanderHost, lunarLanderPort, &lunarLanderAddress);
-    dashboardSocket = makeSocket();
-    lunarLanderSocket = makeSocket();
- 
-    while (1) {
-        getCondition(lunarLanderSocket, lunarLanderAddress);
-        if(landerFuelBefore - landerFuel >=1 || landerAltitudeBefore - landerAltitude >=1 ||
-           landerFuel - landerFuelBefore >= 1 || landerAltitude - landerAltitudeBefore >= 1){
-               dashUpdate(dashboardSocket, dashboardAddress);
-        }
-    }
-}
-
-void* serverThreadController(void *arg) {
-    char *port = "65200";
-    char *host = "192.168.56.1";
-    struct addrinfo *address;
-    int fd;
-    getaddr(host, port, &address);
-    fd = makeSocket();
-    while(1) {
-        serverUpdate(fd, address);
-    }
-}
- 
-void getUserInput(int fd, struct addrinfo *address) {
     initscr();
     noecho();
     keypad(stdscr, TRUE); 
@@ -142,6 +96,41 @@ void getUserInput(int fd, struct addrinfo *address) {
     endwin();
     exit(1);
 }
+ 
+void* dashboardThreadController(void *arg) {
+    char *dashboardPort = "65250";
+    char *dashboardHost = "192.168.56.1";
+    char *lunarLanderPort = "65200";
+    char *lunarLanderHost = "192.168.56.1";
+    struct addrinfo *dashboardAddress, *lunarLanderAddress;
+    int dashboardSocket, lunarLanderSocket;
+
+    getaddr(dashboardHost, dashboardPort, &dashboardAddress);
+    getaddr(lunarLanderHost, lunarLanderPort, &lunarLanderAddress);
+    dashboardSocket = makeSocket();
+    lunarLanderSocket = makeSocket();
+ 
+    while (1) {
+        getCondition(lunarLanderSocket, lunarLanderAddress);
+        if(landerFuelBefore - landerFuel >=1 || landerAltitudeBefore - landerAltitude >=1 ||
+           landerFuel - landerFuelBefore >= 1 || landerAltitude - landerAltitudeBefore >= 1){
+               dashUpdate(dashboardSocket, dashboardAddress);
+        }
+    }
+}
+
+void* serverThreadController(void *arg) {
+    char *port = "65200";
+    char *host = "192.168.56.1";
+    struct addrinfo *address;
+    int fd;
+    getaddr(host, port, &address);
+    fd = makeSocket();
+    while(1) {
+        serverUpdate(fd, address);
+    }
+}
+ 
  
 void sendCommand(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
