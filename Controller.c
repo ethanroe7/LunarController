@@ -190,11 +190,11 @@ void getCondition(int fd, struct addrinfo *address) {
     landerAltitude = strtof(landerAltitudeStr, NULL);
     
 
-    if(fuelBefore == -1) {
+    if(landerFuelBefore == -1) {
 	landerFuelBefore = landerFuel +1;
     }
 
-    if(altitudeBefore == -1) {
+    if(landerAltitudeBefore == -1) {
 	landerAltitudeBefore = landerAltitude +1;
     }
 }
