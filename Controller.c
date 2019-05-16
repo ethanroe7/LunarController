@@ -24,7 +24,7 @@ void serverUpdate(int fd, struct addrinfo *address);
 int getaddr(const char *node, const char *service, struct addrinfo **address);
 int makeSocket(void);
  
-float rcsInc = 0.1;
+float rcsInc = 0.5;
 float rcsRoll = 0;
 int commands = 0;
 int landerEnginePower = 0;
