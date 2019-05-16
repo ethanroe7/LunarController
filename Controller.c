@@ -32,7 +32,7 @@ int landerEnginePower = 0;
 int landerEngineInc = 10;
 float landerFuel;
 float landerAltitude;
-float landerFuelBefore = 1
+float landerFuelBefore = -1;
 float landerAltitudeBefore = -1;
  
 int main(int argc, const char **argv) {
@@ -185,8 +185,7 @@ void getCondition(int fd, struct addrinfo *address) {
    
     char *landerFuel_ = strtok(conditions[2], "%");
     landerFuel = landerFuel_;
-    char *landerAltitude_ = strtok(conditions[3], "contact");
-    landerAltitude = landerAltitude_
+    landerAltitude = strtok(conditions[3], "contact");
     
 
     if(fuelBefore == -1) {
