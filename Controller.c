@@ -12,8 +12,6 @@
 #include <time.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <assert.h>
-#include <time.h>
 #include <pthread.h>
 
 int makeSocket(void);
@@ -36,7 +34,6 @@ float landerFuelBefore = -1;
 float landerAltitudeBefore = -1;
  
 int main(int argc, const char *argv[]) {
-    
     //Create Threads
     pthread_t dashboardThread;
     int dthread = pthread_create(&dashboardThread, NULL, dashboardThreadController, NULL);
@@ -138,10 +135,10 @@ void dashUpdate(int fd, struct addrinfo *address) {
     char outgoing[buffsize];
     snprintf(outgoing, sizeof(outgoing), "fuel: %.2f \naltitude: %.2f", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
-    landerFuelBefore = landerFuel;
-    landerAltitudeBefore = landerAltitude;
-}
 
+    landerFuelBefore = landerFuel;
+    landerAltitudeBefore = landerAltitude; 
+}
 //updates server
 void serverUpdate(int fd, struct addrinfo *address) {
     if(commands > 0) {
@@ -171,10 +168,10 @@ void getCondition(int fd, struct addrinfo *address) {
         condition = strtok(NULL, ":");
     }
 
-    char *landerFuel_ = strtok(conditions[2], "%");
-    char *landerAltitude_ = strtok(conditions[3], "contact");
-    landerFuel = strtof(landerFuel_, NULL);
-    landerAltitude = strtof(landerAltitude_, NULL);
+    char *landerFuelStr = strtok(conditions[2], "%");
+    char *landerAltitudeStr = strtok(conditions[3], "contact");
+    landerFuel = strtof(landerFuelStr, NULL);
+    landerAltitude = strtof(landerAltitudeStr, NULL);
 
     if(landerFuelBefore == -1) {
 	landerFuelBefore = landerFuel +1;
