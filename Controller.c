@@ -187,6 +187,9 @@ void getCondition(int fd, struct addrinfo *address) {
 
     char *landerFuelStr = strtok(conditions[2], "%");
     char *landerAltitudeStr = strtok(conditions[3], "contact");
+    int rc = sem_wait(&sem);
+    assert(rc == 0);
+
     landerFuel = strtof(landerFuelStr, NULL);
     landerAltitude = strtof(landerAltitudeStr, NULL);
 
@@ -197,6 +200,8 @@ void getCondition(int fd, struct addrinfo *address) {
     if(landerAltitudeBefore == -1) {
 	landerAltitudeBefore = landerAltitude +1;
     }
+    rc = sem_post(&sem);
+    assert(rc == 0);
 }
  
 int getaddr(const char *node, const char *service, struct addrinfo **address) {
