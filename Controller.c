@@ -168,10 +168,10 @@ void getCondition(int fd, struct addrinfo *address) {
         condition = strtok(NULL, ":");
     }
 
-    char *landerFuelStr = strtok(conditions[2], "%");
-    char *landerAltitudeStr = strtok(conditions[3], "contact");
-    landerFuel = strtof(landerFuelStr, NULL);
-    landerAltitude = strtof(landerAltitudeStr, NULL);
+    char *landerFuel1 = strtok(conditions[2], "%");
+    char *landerAltitude1 = strtok(conditions[3], "contact");
+    landerFuel = strtof(landerFuel1, NULL);
+    landerAltitude = strtof(landerAltitude1, NULL);
 
     if(landerFuelBefore == -1) {
 	landerFuelBefore = landerFuel +1;
