@@ -142,7 +142,6 @@ void getUserInput(int fd, struct addrinfo *address) {
 void sendCommand(int fd, struct addrinfo *address) {
     const size_t buffsize = 4096;
     char outgoing[buffsize];
- 
     snprintf(outgoing, sizeof(outgoing), "command:!\nmain-engine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
 }
@@ -177,7 +176,7 @@ void getCondition(int fd, struct addrinfo *address) {
     incoming[msgsize] = '\0';
  
     char *condition = strtok(incoming, ":");
-    char *conditions[4]; //condition returns 4 values
+    char *conditions[4]; 
     int i = 0;
  
     while(condition != NULL) {
@@ -185,9 +184,11 @@ void getCondition(int fd, struct addrinfo *address) {
         condition = strtok(NULL, ":");
     }
    
-    char *landerFuel_ = strtok(conditions[2], "%");
-    landerFuel = landerFuel_;
-    landerAltitude = strtok(conditions[3], "contact");
+    char *landerFuelStr = strtok(conditions[2], "%");
+    char *landerAltitudeStr = strtok(conditions[3], "contact");
+
+    landerFuel = strtof(landerFuelStr, NULL);
+    landerAltitude = strtof(landerAltitudeStr, NULL);
 
     if(fuelBefore == -1) {
 	fuelBefore = landerFuel +1;
@@ -220,6 +221,15 @@ int getaddr(const char *node, const char *service, struct addrinfo **address) {
     return true;
 }
  
+int bindSocket(int sfd, const struct sockaddr *addr, socklen_t addrlen) {
+    int err = bind(sfd, addr, addrlen);
+    if(err == -1) {
+        fprintf(stderr, "Error: couldn't bind socket: %s\n", strerror(errno));
+        return false;
+    }
+    return true;
+}
+
 int makeSocket(void) {
     int sfd = socket(AF_INET, SOCK_DGRAM, 0); 
     if(sfd == -1) {
@@ -228,15 +238,6 @@ int makeSocket(void) {
         return 0;
     }
     return sfd;
-}
- 
-int bindSocket(int sfd, const struct sockaddr *addr, socklen_t addrlen) {
-    int err = bind(sfd, addr, addrlen);
-    if(err == -1) {
-        fprintf(stderr, "Error: couldn't bind socket: %s\n", strerror(errno));
-        return false;
-    }
-    return true;
 }
 
 size_t protocol(char *incoming, char *outgoing, size_t size)
