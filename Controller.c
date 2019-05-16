@@ -8,11 +8,13 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
-#include <pthread.h>
 #include <string.h>
 #include <time.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <time.h>
+#include <pthread.h>
 
 int makeSocket(void);
 void* userInputThreadController(void *arg);
@@ -131,7 +133,7 @@ void* dashboardThreadController(void *arg) {
  
 //Updates dashboard
 void dashUpdate(int fd, struct addrinfo *address) {
-    const size_t buffsize = 4096;
+    const size_t buffsize = 4096; //4k
     char outgoing[buffsize];
     snprintf(outgoing, sizeof(outgoing), "fuel: %.2f \naltitude: %.2f", landerFuel, landerAltitude);
     sendto(fd, outgoing, strlen(outgoing), 0, address->ai_addr, address->ai_addrlen);
@@ -143,7 +145,7 @@ void dashUpdate(int fd, struct addrinfo *address) {
 void serverUpdate(int fd, struct addrinfo *address) {
     if(commands > 0) {
         char outgoing[4096];
-        snprintf(outgoing, sizeof(outgoing), "command:!\nengine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
+        snprintf(outgoing, sizeof(outgoing), "command:!\nmain-engine: %i\nrcs-roll: %f", landerEnginePower, rcsRoll);
         sendto(fd, outgoing, strlen(outgoing), 0, address-> ai_addr, address->ai_addrlen);
         commands--;
     }
@@ -203,15 +205,6 @@ int getaddr(const char *node, const char *service, struct addrinfo **address) {
     }
     return true;
 }
- 
-int bindSocket(int sfd, const struct sockaddr *addr, socklen_t addrlen) {
-    int err = bind(sfd, addr, addrlen);
-    if(err == -1) {
-        fprintf(stderr, "Error: couldn't bind socket: %s\n", strerror(errno));
-        return false;
-    }
-    return true;
-}
 
 int makeSocket(void) {
     int sfd = socket(AF_INET, SOCK_DGRAM, 0); 
@@ -221,4 +214,13 @@ int makeSocket(void) {
         return 0;
     }
     return sfd;
+}
+ 
+int bindSocket(int sfd, const struct sockaddr *addr, socklen_t addrlen) {
+    int err = bind(sfd, addr, addrlen);
+    if(err == -1) {
+        fprintf(stderr, "Error: couldn't bind socket: %s\n", strerror(errno));
+        return false;
+    }
+    return true;
 }
