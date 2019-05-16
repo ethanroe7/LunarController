@@ -151,8 +151,10 @@ void dashUpdate(int fd, struct addrinfo *address) {
     //semamphore 
     int rc = sem_wait(&sem);
     assert(rc == 0);
+
     landerFuelBefore = landerFuel;
     landerAltitudeBefore = landerAltitude;
+    
     rc = sem_post(&sem);
     assert(rc == 0); 
 }
@@ -185,13 +187,13 @@ void getCondition(int fd, struct addrinfo *address) {
         condition = strtok(NULL, ":");
     }
 
-    char *landerFuelStr = strtok(conditions[2], "%");
-    char *landerAltitudeStr = strtok(conditions[3], "contact");
+    char *landerFuel_ = strtok(conditions[2], "%");
+    char *landerAltitude_ = strtok(conditions[3], "contact");
     int rc = sem_wait(&sem);
     assert(rc == 0);
 
-    landerFuel = strtof(landerFuelStr, NULL);
-    landerAltitude = strtof(landerAltitudeStr, NULL);
+    landerFuel = strtof(landerFuel_, NULL);
+    landerAltitude = strtof(landerAltitude_, NULL);
 
     if(landerFuelBefore == -1) {
 	landerFuelBefore = landerFuel +1;
