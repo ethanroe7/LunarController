@@ -109,7 +109,6 @@ void* userInputThreadController(void *arg) {
     }
  
     endwin();
-    fclose(file);
     exit(1);
 }
  
